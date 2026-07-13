@@ -24,11 +24,11 @@ import type {
 type Tab = "stats" | "users" | "sessions" | "logs" | "ratelimits"
 
 const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
-  { key: "stats", label: "Stats", icon: ChartBarIcon },
-  { key: "users", label: "Users", icon: UsersIcon },
-  { key: "sessions", label: "Sessions", icon: ClockIcon },
-  { key: "logs", label: "Audit Logs", icon: DocumentTextIcon },
-  { key: "ratelimits", label: "Rate Limits", icon: ShieldExclamationIcon }
+  { key: "stats", label: "Overzicht", icon: ChartBarIcon },
+  { key: "users", label: "Gebruikers", icon: UsersIcon },
+  { key: "sessions", label: "Sessies", icon: ClockIcon },
+  { key: "logs", label: "Logboek", icon: DocumentTextIcon },
+  { key: "ratelimits", label: "Blokkades", icon: ShieldExclamationIcon }
 ]
 
 function getToken(): string {
@@ -93,7 +93,7 @@ export default function AdminPage() {
             <a href="/" className="text-white/40 hover:text-white/60 transition-colors">
               <ArrowLeftIcon className="w-5 h-5" />
             </a>
-            <h1 className="text-xl sm:text-2xl font-bold text-gradient">Admin</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gradient">Beheer</h1>
           </div>
           <span className="text-white/40 text-sm">{user.name}</span>
         </div>
@@ -138,11 +138,11 @@ function StatsPanel({ token }: { token: string }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
       {[
-        { label: "Total Users", value: stats.total_users },
-        { label: "Active Sessions", value: stats.active_sessions },
-        { label: "Actions (24h)", value: stats.actions_24h },
-        { label: "Failed Attempts", value: stats.failed_attempts_24h },
-        { label: "Locked IPs", value: stats.active_lockouts }
+        { label: "Gebruikers", value: stats.total_users },
+        { label: "Actieve sessies", value: stats.active_sessions },
+        { label: "Acties (24u)", value: stats.actions_24h },
+        { label: "Mislukt", value: stats.failed_attempts_24h },
+        { label: "Geblokkeerd", value: stats.active_lockouts }
       ].map(({ label, value }) => (
         <div key={label} className="bg-white/5 rounded-xl p-4 text-center">
           <div className="text-2xl font-bold text-primary">{value}</div>
@@ -169,9 +169,9 @@ function UsersPanel({ token }: { token: string }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-white/60 text-sm font-semibold">Users</h2>
+        <h2 className="text-white/60 text-sm font-semibold">Gebruikers</h2>
         <button onClick={() => setShowAdd(!showAdd)} className="btn-primary text-xs py-1.5 px-4">
-          {showAdd ? "Cancel" : "Add User"}
+          {showAdd ? "Annuleren" : "Toevoegen"}
         </button>
       </div>
 
@@ -226,20 +226,20 @@ function AddUserForm({
   return (
     <form onSubmit={handleSubmit} className="bg-white/5 rounded-xl p-4 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-        <input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Name"
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="Naam"
           className="bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-primary"
           required
         />
-        <input
-          type="number"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={pin}
-          onChange={e => setPin(e.target.value.slice(0, 8))}
-          placeholder="PIN (4-8 digits)"
+          <input
+            type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={pin}
+            onChange={e => setPin(e.target.value.slice(0, 8))}
+            placeholder="Pincode (4-8 cijfers)"
           className="bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-primary"
           required
         />
@@ -248,12 +248,12 @@ function AddUserForm({
           onChange={e => setRole(e.target.value)}
           className="bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-primary"
         >
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-          <option value="guest">Guest</option>
+          <option value="user">Gebruiker</option>
+          <option value="admin">Beheerder</option>
+          <option value="guest">Gast</option>
         </select>
         <button type="submit" disabled={loading} className="btn-primary text-xs py-1.5">
-          Create
+          Aanmaken
         </button>
       </div>
       {error && <p className="text-danger text-xs">{error}</p>}
@@ -294,7 +294,7 @@ function UserActions({
             type="number"
             inputMode="numeric"
             pattern="[0-9]*"
-            placeholder="New PIN"
+            placeholder="Nieuwe pincode"
             value={value}
             onChange={e => setValue(e.target.value.slice(0, 8))}
             className="bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white text-xs w-20 outline-none focus:border-primary"
@@ -306,10 +306,10 @@ function UserActions({
             onChange={e => setValue(e.target.value)}
             className="bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-primary"
           >
-            <option value="">Select...</option>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
-            <option value="guest">Guest</option>
+            <option value="">Kies...</option>
+            <option value="admin">Beheerder</option>
+            <option value="user">Gebruiker</option>
+            <option value="guest">Gast</option>
           </select>
         )}
         <button onClick={handleAction} className="text-success text-xs px-1">OK</button>
@@ -347,14 +347,14 @@ function SessionsPanel({ token }: { token: string }) {
 
   return (
     <div className="space-y-2">
-      <h2 className="text-white/60 text-sm font-semibold">Active Sessions</h2>
+        <h2 className="text-white/60 text-sm font-semibold">Actieve sessies</h2>
       {sessions.map(s => (
         <div key={s.jwt_id} className="bg-white/5 rounded-xl p-3 flex items-center justify-between text-sm">
           <div className="flex items-center space-x-3">
             <span className="text-white">{s.user_name}</span>
             <span className="text-white/30 text-xs">{s.ip || "—"}</span>
             <span className="text-white/20 text-xs">
-              Expires {new Date(s.expires_at).toLocaleTimeString()}
+                  Verloopt om {new Date(s.expires_at).toLocaleTimeString()}
             </span>
           </div>
           <button
@@ -366,7 +366,7 @@ function SessionsPanel({ token }: { token: string }) {
         </div>
       ))}
       {sessions.length === 0 && (
-        <p className="text-white/30 text-sm text-center py-4">No active sessions</p>
+        <p className="text-white/30 text-sm text-center py-4">Geen actieve sessies</p>
       )}
     </div>
   )
@@ -404,7 +404,7 @@ function AuditLogsPanel({ token }: { token: string }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-white/60 text-sm font-semibold">
-          Audit Logs ({total})
+          Logboek ({total})
         </h2>
         <div className="flex space-x-2">
           <select
@@ -417,9 +417,9 @@ function AuditLogsPanel({ token }: { token: string }) {
             }}
             className="bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-primary"
           >
-            <option value="">All</option>
-            <option value="1">Success</option>
-            <option value="0">Failed</option>
+            <option value="">Alles</option>
+            <option value="1">Gelukt</option>
+            <option value="0">Mislukt</option>
           </select>
         </div>
       </div>
@@ -453,7 +453,7 @@ function AuditLogsPanel({ token }: { token: string }) {
           disabled={offset === 0}
           className="text-white/40 hover:text-white text-xs disabled:opacity-20"
         >
-          Previous
+          Vorige
         </button>
         <span className="text-white/30 text-xs">
           {offset + 1}–{Math.min(offset + 30, total)} of {total}
@@ -463,7 +463,7 @@ function AuditLogsPanel({ token }: { token: string }) {
           disabled={offset + 30 >= total}
           className="text-white/40 hover:text-white text-xs disabled:opacity-20"
         >
-          Next
+          Volgende
         </button>
       </div>
     </div>
@@ -484,12 +484,12 @@ function RateLimitsPanel({ token }: { token: string }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h2 className="text-white/60 text-sm font-semibold">Rate Limits</h2>
+        <h2 className="text-white/60 text-sm font-semibold">Blokkades</h2>
         <button
           onClick={async () => { await api.clearRateLimits(token); fetch() }}
           className="text-white/30 hover:text-danger text-xs transition-colors"
         >
-          Clear all
+          Alles wissen
         </button>
       </div>
       {limits.map(l => (
@@ -497,10 +497,10 @@ function RateLimitsPanel({ token }: { token: string }) {
           <div className="flex items-center space-x-3">
             <span className="text-white font-mono text-xs">{l.key}</span>
             <span className="text-white/30 text-xs">{l.type}</span>
-            <span className="text-white/20 text-xs">{l.attempts} attempts</span>
+            <span className="text-white/20 text-xs">{l.attempts} pogingen</span>
             {l.locked_until && new Date(l.locked_until) > new Date() && (
               <span className="text-amber-400 text-xs">
-                Locked {Math.ceil((new Date(l.locked_until).getTime() - Date.now()) / 1000)}s
+                Geblokkeerd {Math.ceil((new Date(l.locked_until).getTime() - Date.now()) / 1000)}s
               </span>
             )}
           </div>
@@ -513,7 +513,7 @@ function RateLimitsPanel({ token }: { token: string }) {
         </div>
       ))}
       {limits.length === 0 && (
-        <p className="text-white/30 text-sm text-center py-4">No rate limits active</p>
+        <p className="text-white/30 text-sm text-center py-4">Geen blokkades</p>
       )}
     </div>
   )

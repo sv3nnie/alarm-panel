@@ -87,12 +87,12 @@ export default function Home() {
     const timeout = expiresAt - Date.now()
     if (timeout <= 0) {
       setSession(null)
-      setError("Session expired. Please enter your PIN again.")
+      setError("Sessie verlopen. Voer je pincode opnieuw in.")
       return
     }
     const timer = setTimeout(() => {
       setSession(null)
-      setError("Session expired. Please enter your PIN again.")
+      setError("Sessie verlopen. Voer je pincode opnieuw in.")
     }, timeout)
     return () => clearTimeout(timer)
   }, [session])
@@ -114,9 +114,9 @@ export default function Home() {
     } catch (err: any) {
       if (err.message?.includes("401")) {
         setSession(null)
-        setError("Session expired. Please sign in again.")
+        setError("Sessie verlopen. Log opnieuw in.")
       } else {
-        setError(err.message || "Failed to arm alarm")
+        setError(err.message || "Inschakelen mislukt")
       }
       setAlarm(prev => ({ ...prev, actionInProgress: false }))
     }
@@ -132,9 +132,9 @@ export default function Home() {
     } catch (err: any) {
       if (err.message?.includes("401")) {
         setSession(null)
-        setError("Session expired. Please sign in again.")
+        setError("Sessie verlopen. Log opnieuw in.")
       } else {
-        setError(err.message || "Failed to disarm alarm")
+        setError(err.message || "Uitschakelen mislukt")
       }
       setAlarm(prev => ({ ...prev, actionInProgress: false }))
     }
@@ -156,10 +156,10 @@ export default function Home() {
       <div className="glass-card max-w-md w-full text-center space-y-6 sm:space-y-8">
         <div className="space-y-2">
           <h1 className="text-xl sm:text-2xl font-bold text-gradient">
-            Alarm Panel
+            Alarmpaneel
           </h1>
           <p className="text-white/40 text-xs sm:text-sm">
-            Signed in as {session.user.name} &middot; Session expires in {timeRemaining}m
+            {session.user.name} &middot; Sessie verloopt over {timeRemaining}m
           </p>
         </div>
 
@@ -183,7 +183,7 @@ export default function Home() {
             <span
               className={`text-lg sm:text-xl font-semibold ${alarm.armed ? "text-danger" : "text-success"}`}
             >
-              {alarm.armed ? "ARMED" : "DISARMED"}
+              {alarm.armed ? "INGESCHAKELD" : "UITGESCHAKELD"}
             </span>
           </div>
         </div>
@@ -196,7 +196,7 @@ export default function Home() {
               className="btn-danger flex items-center justify-center space-x-2"
             >
               <LockClosedIcon className="w-5 h-5" />
-              <span>{alarm.actionInProgress ? "Arming..." : "Arm Alarm"}</span>
+              <span>{alarm.actionInProgress ? "Bezig..." : "Inschakelen"}</span>
             </button>
           ) : (
             <button
@@ -205,7 +205,7 @@ export default function Home() {
               className="btn-success flex items-center justify-center space-x-2"
             >
               <LockClosedIcon className="w-5 h-5" />
-              <span>{alarm.actionInProgress ? "Disarming..." : "Disarm Alarm"}</span>
+              <span>{alarm.actionInProgress ? "Bezig..." : "Uitschakelen"}</span>
             </button>
           )}
         </div>
@@ -219,7 +219,7 @@ export default function Home() {
         <div className="flex flex-col items-center space-y-2">
           {session.user.role === "admin" && (
             <a href="/admin" className="text-primary/60 hover:text-primary text-sm transition-colors">
-              Admin Panel
+              Beheer
             </a>
           )}
           <button
@@ -227,7 +227,7 @@ export default function Home() {
             className="text-white/30 hover:text-white/60 text-sm flex items-center space-x-1 mx-auto transition-colors"
           >
             <ArrowRightOnRectangleIcon className="w-4 h-4" />
-            <span>Sign out</span>
+            <span>Uitloggen</span>
           </button>
         </div>
       </div>
@@ -269,13 +269,13 @@ function PinEntry({
     if (loading || lockoutUntil > 0) return
 
     if (!currentName.trim()) {
-      setError("Please enter your name")
+      setError("Vul je naam in")
       nameRef.current?.focus()
       return
     }
 
     if (currentPin.length < PIN_LENGTH) {
-      setError(`Please enter your ${PIN_LENGTH}-digit PIN`)
+      setError("Vul je pincode in")
       inputRef.current?.focus()
       return
     }
@@ -295,7 +295,7 @@ function PinEntry({
       localStorage.setItem("alarm_session", JSON.stringify(session))
       onAuthenticated(session)
     } catch (err: any) {
-      const msg = err.message || "Verification failed"
+      const msg = err.message || "Verificatie mislukt"
       setError(msg)
 
       if (msg.includes("Too many")) {
@@ -348,10 +348,10 @@ function PinEntry({
             <LockClosedIcon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-gradient">
-            Alarm Panel
+            Alarmpaneel
           </h1>
           <p className="text-white/40 text-xs sm:text-sm">
-            Enter your credentials to continue
+            Voer je gegevens in om verder te gaan
           </p>
         </div>
 
@@ -364,7 +364,7 @@ function PinEntry({
               value={name}
               onChange={e => setName(e.target.value)}
               onKeyDown={handleNameKeyDown}
-              placeholder="Name"
+              placeholder="Naam"
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
@@ -374,7 +374,6 @@ function PinEntry({
             />
           </div>
 
-          {/* PIN digit boxes */}
           <div className="space-y-3">
             <div
               className="flex justify-center gap-2 sm:gap-3 cursor-pointer"
@@ -407,7 +406,7 @@ function PinEntry({
               autoComplete="off"
               autoCorrect="off"
               className="absolute opacity-0 w-0 h-0 pointer-events-none"
-              aria-label="PIN code"
+              aria-label="Pincode"
             />
           </div>
         </div>
@@ -415,7 +414,7 @@ function PinEntry({
         {lockoutUntil > 0 ? (
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
             <p className="text-amber-400 text-sm">
-              Locked out &middot; Try again in {lockoutRemaining}s
+              Geblokkeerd &middot; Probeer opnieuw over {lockoutRemaining}s
             </p>
           </div>
         ) : error ? (
@@ -447,7 +446,7 @@ function PinEntry({
               />
             </svg>
           ) : (
-            <span>Verify PIN</span>
+            <span>Verifieer pincode</span>
           )}
         </button>
       </div>
