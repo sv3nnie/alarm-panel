@@ -30,8 +30,8 @@ async function request(path: string, options: RequestInit & ApiOptions = {}) {
   return data
 }
 
-export async function getAlarmStatus() {
-  return request("/api/alarm/status")
+export async function getAlarmStatus(token: string) {
+  return request("/api/alarm/status", { token })
 }
 
 export async function armAlarm(token: string) {
@@ -55,8 +55,8 @@ export async function verifyPin(name: string, pin: string) {
   })
 }
 
-export function createSSEConnection(onMessage: (armed: boolean) => void) {
-  const eventSource = new EventSource(`${API_BASE}/api/alarm/events`)
+export function createSSEConnection(token: string, onMessage: (armed: boolean) => void) {
+  const eventSource = new EventSource(`${API_BASE}/api/alarm/events?token=${encodeURIComponent(token)}`)
 
   eventSource.onmessage = (event) => {
     try {

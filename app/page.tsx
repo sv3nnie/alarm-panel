@@ -40,9 +40,9 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
 
-  const pollAlarmState = useCallback(async () => {
+  const pollAlarmState = useCallback(async (token: string) => {
     try {
-      const data = await api.getAlarmStatus()
+      const data = await api.getAlarmStatus(token)
       setAlarm(prev => ({ ...prev, armed: data.armed, loading: false }))
     } catch {
       setAlarm(prev => ({ ...prev, loading: false }))
@@ -50,23 +50,24 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    pollAlarmState()
+    if (!session) {
+      setAlarm({ armed: false, loading: true, actionInProgress: false })
+      return
+    }
 
-    const es = api.createSSEConnection(armed => {
+    pollAlarmState(session.token)
+
+    const es = api.createSSEConnection(session.token, armed => {
       setAlarm(prev => ({ ...prev, armed, loading: false }))
     })
 
     eventSourceRef.current = es
 
-    const pollInterval = setInterval(pollAlarmState, 10000)
+    const pollInterval = setInterval(() => pollAlarmState(session.token), 10000)
     return () => {
       es.close()
       clearInterval(pollInterval)
     }
-  }, [pollAlarmState])
-
-  useEffect(() => {
-    if (session) pollAlarmState()
   }, [session, pollAlarmState])
 
   useEffect(() => {
