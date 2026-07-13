@@ -380,25 +380,22 @@ function AuditLogsPanel({ token }: { token: string }) {
   const [offset, setOffset] = useState(0)
   const [filterSuccess, setFilterSuccess] = useState<number | undefined>(undefined)
 
-  const fetch = useCallback(
-    (newOffset?: number) => {
-      api
-        .getAuditLogs(token, {
-          limit: 30,
-          offset: newOffset ?? offset,
-          success: filterSuccess
-        })
-        .then(d => {
-          setLogs(d.logs)
-          setTotal(d.total)
-          setOffset(d.offset)
-        })
-        .catch(() => {})
-    },
-    [token, offset, filterSuccess]
-  )
+  const doFetch = (newOffset: number, filter?: number) => {
+    api
+      .getAuditLogs(token, {
+        limit: 30,
+        offset: newOffset,
+        success: filter
+      })
+      .then(d => {
+        setLogs(d.logs)
+        setTotal(d.total)
+        setOffset(d.offset)
+      })
+      .catch(() => {})
+  }
 
-  useEffect(() => { fetch() }, [token])
+  useEffect(() => { doFetch(0, undefined) }, [token])
 
   return (
     <div className="space-y-4">
@@ -413,7 +410,7 @@ function AuditLogsPanel({ token }: { token: string }) {
               const v = e.target.value === "" ? undefined : Number(e.target.value)
               setFilterSuccess(v)
               setOffset(0)
-              setTimeout(() => fetch(0), 0)
+              doFetch(0, v)
             }}
             className="bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-primary"
           >
@@ -449,7 +446,7 @@ function AuditLogsPanel({ token }: { token: string }) {
 
       <div className="flex justify-between">
         <button
-          onClick={() => fetch(Math.max(0, offset - 30))}
+          onClick={() => doFetch(Math.max(0, offset - 30), filterSuccess)}
           disabled={offset === 0}
           className="text-white/40 hover:text-white text-xs disabled:opacity-20"
         >
@@ -459,7 +456,7 @@ function AuditLogsPanel({ token }: { token: string }) {
           {offset + 1}–{Math.min(offset + 30, total)} of {total}
         </span>
         <button
-          onClick={() => fetch(offset + 30)}
+          onClick={() => doFetch(offset + 30, filterSuccess)}
           disabled={offset + 30 >= total}
           className="text-white/40 hover:text-white text-xs disabled:opacity-20"
         >
