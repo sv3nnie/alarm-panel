@@ -9,21 +9,16 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#3B82F6",
-          dark: "#2563EB",
-          light: "#60A5FA"
-        },
-        dark: {
-          DEFAULT: "#0F172A",
-          deeper: "#020617"
+          DEFAULT: "#2563EB",
+          dark: "#1D4ED8"
         },
         success: {
-          DEFAULT: "#22C55E",
-          dark: "#16A34A"
+          DEFAULT: "#16A34A",
+          dark: "#15803D"
         },
         danger: {
-          DEFAULT: "#EF4444",
-          dark: "#DC2626"
+          DEFAULT: "#DC2626",
+          dark: "#B91C1C"
         }
       }
     }

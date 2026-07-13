@@ -22,7 +22,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#020617"
+  themeColor: "#ffffff"
 }
 
 export default function RootLayout({
@@ -38,7 +38,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <SWorker />
-        <div className="min-h-dvh bg-gradient-to-br from-dark-deeper via-dark to-dark-deeper flex flex-col">
+        <div className="min-h-dvh bg-slate-50 flex flex-col">
           {children}
         </div>
       </body>
