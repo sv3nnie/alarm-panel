@@ -86,9 +86,9 @@ export default function AdminPage() {
   if (!user) return null
 
   return (
-    <div className="flex-1 p-4 sm:p-6 safe-bottom">
-      <div className="glass-card max-w-5xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+    <div className="min-h-dvh flex flex-col p-4 sm:p-6 safe-bottom">
+      <div className="glass-card max-w-5xl w-full mx-auto flex flex-col flex-1 min-h-0 space-y-4">
+        <div className="flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
             <a href="/" className="text-white/40 hover:text-white/60 transition-colors">
               <ArrowLeftIcon className="w-5 h-5" />
@@ -99,7 +99,7 @@ export default function AdminPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-1 bg-white/5 rounded-xl p-1 overflow-x-auto">
+        <div className="flex space-x-1 bg-white/5 rounded-xl p-1 overflow-x-auto shrink-0">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -114,11 +114,13 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {tab === "stats" && <StatsPanel token={token} />}
-        {tab === "users" && <UsersPanel token={token} />}
-        {tab === "sessions" && <SessionsPanel token={token} />}
-        {tab === "logs" && <AuditLogsPanel token={token} />}
-        {tab === "ratelimits" && <RateLimitsPanel token={token} />}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {tab === "stats" && <StatsPanel token={token} />}
+          {tab === "users" && <UsersPanel token={token} />}
+          {tab === "sessions" && <SessionsPanel token={token} />}
+          {tab === "logs" && <AuditLogsPanel token={token} />}
+          {tab === "ratelimits" && <RateLimitsPanel token={token} />}
+        </div>
       </div>
     </div>
   )
@@ -398,8 +400,8 @@ function AuditLogsPanel({ token }: { token: string }) {
   useEffect(() => { doFetch(0, undefined) }, [token])
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col min-h-0 h-full space-y-3">
+      <div className="flex items-center justify-between shrink-0">
         <h2 className="text-white/60 text-sm font-semibold">
           Logboek ({total})
         </h2>
@@ -421,7 +423,7 @@ function AuditLogsPanel({ token }: { token: string }) {
         </div>
       </div>
 
-      <div className="space-y-1 max-h-96 overflow-y-auto">
+      <div className="space-y-1 flex-1 min-h-0 overflow-y-auto">
         {logs.map(log => (
           <div
             key={log.id}
@@ -444,7 +446,7 @@ function AuditLogsPanel({ token }: { token: string }) {
         ))}
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between shrink-0">
         <button
           onClick={() => doFetch(Math.max(0, offset - 30), filterSuccess)}
           disabled={offset === 0}
