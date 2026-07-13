@@ -13,6 +13,8 @@ export function SWorker() {
 
     const handler = (e: Event) => {
       e.preventDefault()
+      // Only show on touch devices (phones/tablets), not desktop
+      if (!window.matchMedia("(pointer: coarse)").matches) return
       setInstallPrompt(e)
       setShowPrompt(true)
     }
