@@ -46,14 +46,14 @@ export function SWorker() {
         <div className="flex items-center space-x-3">
           <img src="/icon-192.svg" alt="" className="w-10 h-10 rounded-xl" />
           <div>
-            <p className="text-slate-900 text-sm font-medium">Alarmpaneel</p>
-            <p className="text-slate-500 text-xs">Voeg toe aan beginscherm</p>
+            <p className="text-slate-900 dark:text-slate-100 text-sm font-medium">Alarmpaneel</p>
+            <p className="text-slate-500 dark:text-slate-400 text-xs">Voeg toe aan beginscherm</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowPrompt(false)}
-            className="text-slate-400 hover:text-slate-600 text-xs px-2"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs px-2"
           >
             Later
           </button>

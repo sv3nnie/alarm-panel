@@ -89,18 +89,18 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-dvh flex flex-col safe-bottom">
-      <header className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white shrink-0">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
         <div className="flex items-center gap-3">
-          <a href="/" className="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Terug">
+          <a href="/" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors" aria-label="Terug">
             <ArrowLeftIcon className="w-5 h-5" />
           </a>
-          <h1 className="text-lg font-semibold text-slate-900">Beheer</h1>
+          <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Beheer</h1>
         </div>
-        <span className="text-slate-500 text-sm">{user.name}</span>
+        <span className="text-slate-500 dark:text-slate-400 text-sm">{user.name}</span>
       </header>
 
       <div className="flex-1 flex flex-col min-h-0 max-w-5xl w-full mx-auto p-4 sm:p-6 space-y-4">
-        <div className="flex gap-1 border-b border-slate-200 overflow-x-auto shrink-0">
+        <div className="flex gap-1 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -108,7 +108,7 @@ export default function AdminPage() {
               className={`flex items-center gap-1.5 px-3.5 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors ${
                 tab === key
                   ? "border-primary text-primary"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
+                  : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -153,8 +153,8 @@ function StatsPanel({ token }: { token: string }) {
       {cards.map(({ label, value, icon: Icon }) => (
         <div key={label} className="card p-4">
           <Icon className="w-5 h-5 text-primary mb-2" />
-          <div className="text-2xl font-bold text-slate-900">{value}</div>
-          <div className="text-slate-500 text-xs mt-0.5">{label}</div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{value}</div>
+          <div className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">{label}</div>
         </div>
       ))}
     </div>
@@ -177,7 +177,7 @@ function UsersPanel({ token }: { token: string }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-slate-900 text-sm font-semibold">Gebruikers</h2>
+        <h2 className="text-slate-900 dark:text-slate-100 text-sm font-semibold">Gebruikers</h2>
         <button onClick={() => setShowAdd(!showAdd)} className="btn-primary text-xs py-1.5 px-4">
           {showAdd ? "Annuleren" : "Toevoegen"}
         </button>
@@ -189,11 +189,11 @@ function UsersPanel({ token }: { token: string }) {
 
       {error && <p className="text-danger text-sm">{error}</p>}
 
-      <div className="card divide-y divide-slate-100">
+      <div className="card divide-y divide-slate-100 dark:divide-slate-800">
         {users.map(u => (
           <div key={u.id} className="p-3.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-slate-900 text-sm font-medium">{u.name}</span>
+              <span className="text-slate-900 dark:text-slate-100 text-sm font-medium">{u.name}</span>
               <span className={`badge ${u.role === "admin" ? "badge-primary" : "badge-neutral"}`}>
                 {u.role}
               </span>
@@ -239,27 +239,27 @@ function AddUserForm({
   return (
     <form onSubmit={handleSubmit} className="card p-4 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <input
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="Naam"
-          className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+        <input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="Naam"
+          className="field"
           required
         />
-          <input
-            type="number"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={pin}
-            onChange={e => setPin(e.target.value.slice(0, 8))}
-            placeholder="Pincode (4-8 cijfers)"
-          className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+        <input
+          type="number"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={pin}
+          onChange={e => setPin(e.target.value.slice(0, 8))}
+          placeholder="Pincode (4-8 cijfers)"
+          className="field"
           required
         />
         <select
           value={role}
           onChange={e => setRole(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="field"
         >
           <option value="user">Gebruiker</option>
           <option value="admin">Beheerder</option>
@@ -310,14 +310,14 @@ function UserActions({
             placeholder="Nieuwe pincode"
             value={value}
             onChange={e => setValue(e.target.value.slice(0, 8))}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-900 text-xs w-24 outline-none focus:border-primary"
+            className="field-sm w-24"
           />
         )}
         {mode === "role" && (
           <select
             value={value}
             onChange={e => setValue(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-900 text-xs outline-none focus:border-primary"
+            className="field-sm"
           >
             <option value="">Kies...</option>
             <option value="admin">Beheerder</option>
@@ -326,12 +326,12 @@ function UserActions({
           </select>
         )}
         {mode === "delete" && (
-          <span className="text-slate-500 text-xs">Weet je het zeker?</span>
+          <span className="text-slate-500 dark:text-slate-400 text-xs">Weet je het zeker?</span>
         )}
         <button onClick={handleAction} className="text-success hover:text-success-dark text-xs font-medium px-1">
           OK
         </button>
-        <button onClick={() => setMode("none")} className="text-slate-400 hover:text-slate-600 text-xs px-1">
+        <button onClick={() => setMode("none")} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs px-1">
           Annuleren
         </button>
         {error && <span className="text-danger text-xs">{error}</span>}
@@ -367,12 +367,12 @@ function SessionsPanel({ token }: { token: string }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-slate-900 text-sm font-semibold">Actieve sessies</h2>
-      <div className="card divide-y divide-slate-100">
+      <h2 className="text-slate-900 dark:text-slate-100 text-sm font-semibold">Actieve sessies</h2>
+      <div className="card divide-y divide-slate-100 dark:divide-slate-800">
         {sessions.map(s => (
           <div key={s.jwt_id} className="p-3.5 flex items-center justify-between text-sm">
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-              <span className="text-slate-900 font-medium">{s.user_name}</span>
+              <span className="text-slate-900 dark:text-slate-100 font-medium">{s.user_name}</span>
               <span className="text-slate-400 text-xs font-mono">{s.ip || "—"}</span>
               <span className="text-slate-400 text-xs">
                 Verloopt om {new Date(s.expires_at).toLocaleTimeString()}
@@ -423,7 +423,7 @@ function AuditLogsPanel({ token }: { token: string }) {
   return (
     <div className="flex flex-col min-h-0 h-full space-y-3">
       <div className="flex items-center justify-between shrink-0">
-        <h2 className="text-slate-900 text-sm font-semibold">
+        <h2 className="text-slate-900 dark:text-slate-100 text-sm font-semibold">
           Logboek ({total})
         </h2>
         <select
@@ -434,7 +434,7 @@ function AuditLogsPanel({ token }: { token: string }) {
             setOffset(0)
             doFetch(0, v)
           }}
-          className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-slate-900 text-xs outline-none focus:border-primary"
+          className="field-sm py-1.5"
         >
           <option value="">Alles</option>
           <option value="1">Gelukt</option>
@@ -442,7 +442,7 @@ function AuditLogsPanel({ token }: { token: string }) {
         </select>
       </div>
 
-      <div className="card divide-y divide-slate-100 flex-1 min-h-0 overflow-y-auto">
+      <div className="card divide-y divide-slate-100 dark:divide-slate-800 flex-1 min-h-0 overflow-y-auto">
         {logs.map(log => (
           <div
             key={log.id}
@@ -454,8 +454,8 @@ function AuditLogsPanel({ token }: { token: string }) {
               <span className="text-slate-400 font-mono shrink-0">
                 {new Date(log.timestamp).toLocaleString()}
               </span>
-              <span className="text-slate-900 font-medium">{log.user_name || "—"}</span>
-              <span className="text-slate-500">{log.action}</span>
+              <span className="text-slate-900 dark:text-slate-100 font-medium">{log.user_name || "—"}</span>
+              <span className="text-slate-500 dark:text-slate-400">{log.action}</span>
               <span className="text-slate-400">{log.ip}</span>
             </div>
             <span className={`badge shrink-0 py-0.5 px-2 ${log.success ? "badge-success" : "badge-danger"}`}>
@@ -477,7 +477,7 @@ function AuditLogsPanel({ token }: { token: string }) {
         <button
           onClick={() => doFetch(Math.max(0, offset - 30), filterSuccess)}
           disabled={offset === 0}
-          className="text-slate-500 hover:text-slate-900 text-xs font-medium disabled:opacity-30 disabled:pointer-events-none"
+          className="text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 text-xs font-medium disabled:opacity-30 disabled:pointer-events-none"
         >
           Vorige
         </button>
@@ -487,7 +487,7 @@ function AuditLogsPanel({ token }: { token: string }) {
         <button
           onClick={() => doFetch(offset + 30, filterSuccess)}
           disabled={offset + 30 >= total}
-          className="text-slate-500 hover:text-slate-900 text-xs font-medium disabled:opacity-30 disabled:pointer-events-none"
+          className="text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 text-xs font-medium disabled:opacity-30 disabled:pointer-events-none"
         >
           Volgende
         </button>
@@ -510,7 +510,7 @@ function RateLimitsPanel({ token }: { token: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-slate-900 text-sm font-semibold">Blokkades</h2>
+        <h2 className="text-slate-900 dark:text-slate-100 text-sm font-semibold">Blokkades</h2>
         <button
           onClick={async () => { await api.clearRateLimits(token); fetch() }}
           className="text-slate-500 hover:text-danger text-xs font-medium transition-colors"
@@ -518,15 +518,15 @@ function RateLimitsPanel({ token }: { token: string }) {
           Alles wissen
         </button>
       </div>
-      <div className="card divide-y divide-slate-100">
+      <div className="card divide-y divide-slate-100 dark:divide-slate-800">
         {limits.map(l => (
           <div key={l.id} className="p-3.5 flex items-center justify-between text-sm">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-slate-900 font-mono text-xs">{l.key}</span>
+              <span className="text-slate-900 dark:text-slate-100 font-mono text-xs">{l.key}</span>
               <span className="badge badge-neutral">{l.type}</span>
               <span className="text-slate-400 text-xs">{l.attempts} pogingen</span>
               {l.locked_until && new Date(l.locked_until) > new Date() && (
-                <span className="badge bg-amber-50 text-amber-700">
+                <span className="badge bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
                   Geblokkeerd {Math.ceil((new Date(l.locked_until).getTime() - Date.now()) / 1000)}s
                 </span>
               )}

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import {
   ShieldCheckIcon,
-  CheckCircleIcon,
+  LockOpenIcon,
   LockClosedIcon,
   ArrowRightOnRectangleIcon,
   Cog6ToothIcon,
@@ -11,6 +11,7 @@ import {
   UserIcon
 } from "@heroicons/react/24/outline"
 import * as api from "./helpers/api"
+import type { SSEStatus } from "./helpers/api"
 
 interface User {
   id: number
@@ -53,7 +54,8 @@ export default function Home() {
     actionInProgress: false
   })
   const [error, setError] = useState<string | null>(null)
-  const eventSourceRef = useRef<EventSource | null>(null)
+  const [sseStatus, setSseStatus] = useState<SSEStatus>("connecting")
+  const eventSourceRef = useRef<{ close: () => void } | null>(null)
 
   const pollAlarmState = useCallback(async (token: string) => {
     try {
@@ -72,9 +74,11 @@ export default function Home() {
 
     pollAlarmState(session.token)
 
-    const es = api.createSSEConnection(session.token, armed => {
-      setAlarm(prev => ({ ...prev, armed, loading: false }))
-    })
+    const es = api.createSSEConnection(
+      session.token,
+      armed => setAlarm(prev => ({ ...prev, armed, loading: false })),
+      setSseStatus
+    )
 
     eventSourceRef.current = es
 
@@ -157,19 +161,19 @@ export default function Home() {
 
   return (
     <div className="flex-1 flex flex-col safe-bottom">
-      <header className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white shrink-0">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="bg-primary text-white rounded-xl p-1.5">
             <ShieldCheckIcon className="w-5 h-5" />
           </div>
-          <span className="font-semibold text-slate-900">Alarmpaneel</span>
+          <span className="font-semibold text-slate-900 dark:text-slate-100">Alarmpaneel</span>
         </div>
         <div className="flex items-center gap-4">
           {session.user.role === "admin" && (
             <a
               href="/admin"
               aria-label="Beheer"
-              className="text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
             >
               <Cog6ToothIcon className="w-5 h-5" />
             </a>
@@ -177,7 +181,7 @@ export default function Home() {
           <button
             onClick={handleLogout}
             aria-label="Uitloggen"
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
           >
             <ArrowRightOnRectangleIcon className="w-5 h-5" />
           </button>
@@ -194,26 +198,21 @@ export default function Home() {
                 {alarm.armed ? (
                   <LockClosedIcon className="w-12 h-12 text-primary" />
                 ) : (
-                  <CheckCircleIcon className="w-12 h-12 text-success" />
+                  <LockOpenIcon className="w-12 h-12 text-success" />
                 )}
               </div>
-              <div className="space-y-1.5">
-                <span className={`badge ${alarm.armed ? "badge-primary" : "badge-success"}`}>
-                  <span className={`w-2 h-2 rounded-full ${alarm.armed ? "bg-primary" : "bg-success"}`} />
-                  {alarm.armed ? "Ingeschakeld" : "Uitgeschakeld"}
-                </span>
-                <p className="text-slate-500 text-sm">
-                  {alarm.armed ? "Het systeem bewaakt je woning" : "Je bent veilig thuis"}
-                </p>
-              </div>
+              <span className={`badge ${alarm.armed ? "badge-primary" : "badge-success"}`}>
+                <span className={`w-2 h-2 rounded-full ${alarm.armed ? "bg-primary" : "bg-success"}`} />
+                {alarm.armed ? "Ingeschakeld" : "Uitgeschakeld"}
+              </span>
             </>
           )}
         </div>
 
         <div className="space-y-3">
           {error && (
-            <div className="bg-danger/10 border border-danger/20 rounded-xl p-3">
-              <p className="text-danger-dark text-sm text-center">{error}</p>
+            <div className="alert-danger">
+              <p className="alert-danger-text text-sm text-center">{error}</p>
             </div>
           )}
 
@@ -232,9 +231,15 @@ export default function Home() {
               disabled={alarm.actionInProgress || alarm.loading}
               className="btn-success w-full flex items-center justify-center gap-2"
             >
-              <CheckCircleIcon className="w-5 h-5" />
+              <LockOpenIcon className="w-5 h-5" />
               <span>{alarm.actionInProgress ? "Bezig..." : "Uitschakelen"}</span>
             </button>
+          )}
+
+          {sseStatus !== "open" && (
+            <p className="text-center text-amber-600 dark:text-amber-400 text-xs">
+              Live-updates herstellen &middot; status wordt elke 10s ververst
+            </p>
           )}
 
           <p className="text-center text-slate-400 text-xs">
@@ -382,8 +387,8 @@ function PinEntry({
           <div className="bg-primary text-white rounded-2xl p-3 inline-flex">
             <ShieldCheckIcon className="w-7 h-7" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900">Alarmpaneel</h1>
-          <p className="text-slate-500 text-sm">
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Alarmpaneel</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
             {editingName ? "Voer je naam in om te beginnen" : "Voer je pincode in"}
           </p>
         </div>
@@ -402,20 +407,18 @@ function PinEntry({
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-10 pr-4 text-slate-900
-                       placeholder:text-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20
-                       transition-all text-base"
+              className="input-field"
             />
           </div>
         ) : (
-          <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+          <div className="surface-muted flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2 min-w-0">
               <UserIcon className="w-4 h-4 text-slate-400 shrink-0" />
-              <span className="text-slate-700 font-medium text-sm truncate">{name}</span>
+              <span className="text-slate-700 dark:text-slate-200 font-medium text-sm truncate">{name}</span>
             </div>
             <button
               onClick={handleSwitchUser}
-              className="text-primary hover:text-primary-dark text-xs font-medium shrink-0"
+              className="text-primary hover:text-primary-dark dark:hover:text-blue-400 text-xs font-medium shrink-0"
             >
               Wisselen
             </button>
@@ -423,14 +426,14 @@ function PinEntry({
         )}
 
         {lockoutUntil > 0 ? (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-            <p className="text-amber-700 text-sm text-center">
+          <div className="alert-warning">
+            <p className="alert-warning-text text-sm text-center">
               Geblokkeerd &middot; probeer opnieuw over {lockoutRemaining}s
             </p>
           </div>
         ) : error ? (
-          <div className="bg-danger/10 border border-danger/20 rounded-xl p-3">
-            <p className="text-danger-dark text-sm text-center">{error}</p>
+          <div className="alert-danger">
+            <p className="alert-danger-text text-sm text-center">{error}</p>
           </div>
         ) : null}
 
@@ -487,7 +490,7 @@ function Keypad({
               onClick={onBackspace}
               disabled={disabled}
               aria-label="Verwijder cijfer"
-              className="keypad-btn text-slate-400"
+              className="keypad-btn text-slate-400 dark:text-slate-500"
             >
               <BackspaceIcon className="w-6 h-6" />
             </button>

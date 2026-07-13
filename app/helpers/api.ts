@@ -55,25 +55,58 @@ export async function verifyPin(name: string, pin: string) {
   })
 }
 
-export function createSSEConnection(token: string, onMessage: (armed: boolean) => void) {
-  const eventSource = new EventSource(`${API_BASE}/api/alarm/events?token=${encodeURIComponent(token)}`)
+export type SSEStatus = "connecting" | "open" | "closed"
 
-  eventSource.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data)
-      if (data.armed !== undefined) {
-        onMessage(data.armed)
+const SSE_RECONNECT_DELAY_MS = 5000
+
+export function createSSEConnection(
+  token: string,
+  onMessage: (armed: boolean) => void,
+  onStatusChange?: (status: SSEStatus) => void
+) {
+  let stopped = false
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+  let eventSource: EventSource | null = null
+
+  const connect = () => {
+    if (stopped) return
+    onStatusChange?.("connecting")
+
+    eventSource = new EventSource(`${API_BASE}/api/alarm/events?token=${encodeURIComponent(token)}`)
+
+    eventSource.onopen = () => {
+      onStatusChange?.("open")
+    }
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        if (data.armed !== undefined) {
+          onMessage(data.armed)
+        }
+      } catch {
+        // ignore parse errors
       }
-    } catch {
-      // ignore parse errors
+    }
+
+    eventSource.onerror = () => {
+      eventSource?.close()
+      onStatusChange?.("closed")
+      if (!stopped) {
+        reconnectTimer = setTimeout(connect, SSE_RECONNECT_DELAY_MS)
+      }
     }
   }
 
-  eventSource.onerror = () => {
-    eventSource.close()
-  }
+  connect()
 
-  return eventSource
+  return {
+    close: () => {
+      stopped = true
+      if (reconnectTimer) clearTimeout(reconnectTimer)
+      eventSource?.close()
+    }
+  }
 }
 
 export { API_BASE }

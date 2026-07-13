@@ -3,21 +3,43 @@
 @tailwind utilities;
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
 }
 
 .card {
-  @apply bg-white border border-slate-200 rounded-2xl shadow-sm;
+  @apply bg-white border border-slate-200 rounded-2xl shadow-sm dark:bg-slate-900 dark:border-slate-800;
 }
 
 .card-padded {
   @apply card p-6 sm:p-8;
 }
 
+.surface-muted {
+  @apply bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-800 dark:border-slate-700;
+}
+
+.input-field {
+  @apply w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-10 pr-4 text-slate-900
+         placeholder:text-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20
+         transition-all text-base
+         dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:placeholder:text-slate-500;
+}
+
+.field {
+  @apply bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-sm outline-none
+         focus:border-primary focus:ring-2 focus:ring-primary/20
+         dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100;
+}
+
+.field-sm {
+  @apply bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-900 text-xs outline-none
+         focus:border-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100;
+}
+
 .pin-dot {
-  @apply w-3.5 h-3.5 rounded-full bg-slate-200 transition-colors duration-150;
+  @apply w-3.5 h-3.5 rounded-full bg-slate-200 transition-colors duration-150 dark:bg-slate-700;
 }
 
 .pin-dot-filled {
@@ -27,7 +49,8 @@ body {
 .keypad-btn {
   @apply h-16 rounded-2xl bg-white border border-slate-200 shadow-sm text-2xl font-semibold
          text-slate-800 transition-all duration-100 active:scale-95 active:bg-slate-100
-         disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center select-none;
+         disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center select-none
+         dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:active:bg-slate-700;
 }
 
 .btn-primary {
@@ -39,13 +62,13 @@ body {
 .btn-danger {
   @apply bg-danger hover:bg-danger-dark text-white font-semibold py-4 px-8 rounded-xl
          transition-colors duration-150 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed
-         text-base sm:text-lg w-full sm:w-auto;
+         text-base sm:text-lg;
 }
 
 .btn-success {
   @apply bg-success hover:bg-success-dark text-white font-semibold py-4 px-8 rounded-xl
          transition-colors duration-150 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed
-         text-base sm:text-lg w-full sm:w-auto;
+         text-base sm:text-lg;
 }
 
 .badge {
@@ -53,19 +76,35 @@ body {
 }
 
 .badge-primary {
-  @apply bg-primary/10 text-primary-dark;
+  @apply bg-primary/10 text-primary-dark dark:bg-primary/15 dark:text-blue-300;
 }
 
 .badge-success {
-  @apply bg-success/10 text-success-dark;
+  @apply bg-success/10 text-success-dark dark:bg-success/15 dark:text-green-300;
 }
 
 .badge-danger {
-  @apply bg-danger/10 text-danger-dark;
+  @apply bg-danger/10 text-danger-dark dark:bg-danger/15 dark:text-red-300;
 }
 
 .badge-neutral {
-  @apply bg-slate-100 text-slate-600;
+  @apply bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300;
+}
+
+.alert-danger {
+  @apply bg-danger/10 border border-danger/20 rounded-xl p-3 dark:bg-red-500/10 dark:border-red-500/20;
+}
+
+.alert-danger-text {
+  @apply text-danger-dark dark:text-red-400;
+}
+
+.alert-warning {
+  @apply bg-amber-50 border border-amber-200 rounded-xl p-3 dark:bg-amber-500/10 dark:border-amber-500/20;
+}
+
+.alert-warning-text {
+  @apply text-amber-700 dark:text-amber-400;
 }
 
 /* Safe area padding for notched devices */
