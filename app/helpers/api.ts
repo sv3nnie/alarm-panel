@@ -77,3 +77,130 @@ export function createSSEConnection(token: string, onMessage: (armed: boolean) =
 }
 
 export { API_BASE }
+
+// --- Admin ---
+
+export interface AdminUser {
+  id: number
+  name: string
+  role: string
+  created_at: string
+}
+
+export interface AdminSession {
+  id: number
+  jwt_id: string
+  user_id: number
+  user_name: string
+  expires_at: string
+  ip: string
+  user_agent: string
+  created_at: string
+}
+
+export interface AuditLogEntry {
+  id: number
+  timestamp: string
+  user_id: number | null
+  user_name: string | null
+  ip: string | null
+  country: string | null
+  user_agent: string | null
+  endpoint: string | null
+  action: string | null
+  success: number
+  old_state: string | null
+  new_state: string | null
+  response_time_ms: number | null
+}
+
+export interface RateLimitEntry {
+  id: number
+  key: string
+  type: string
+  attempts: number
+  locked_until: string | null
+}
+
+export interface AdminStats {
+  total_users: number
+  active_sessions: number
+  actions_24h: number
+  failed_attempts_24h: number
+  active_lockouts: number
+}
+
+export async function getAdminStats(token: string) {
+  return request("/api/admin/stats", { token }) as Promise<AdminStats>
+}
+
+export async function getAdminUsers(token: string) {
+  return request("/api/admin/users", { token }) as Promise<{ users: AdminUser[] }>
+}
+
+export async function createUser(token: string, name: string, pin: string, role: string) {
+  return request("/api/admin/users", {
+    method: "POST",
+    token,
+    body: JSON.stringify({ name, pin, role })
+  })
+}
+
+export async function deleteUser(token: string, userId: number) {
+  return request(`/api/admin/users/${userId}`, { method: "DELETE", token })
+}
+
+export async function setUserPin(token: string, userId: number, pin: string) {
+  return request(`/api/admin/users/${userId}/pin`, {
+    method: "PUT",
+    token,
+    body: JSON.stringify({ pin })
+  })
+}
+
+export async function setUserRole(token: string, userId: number, role: string) {
+  return request(`/api/admin/users/${userId}/role`, {
+    method: "PUT",
+    token,
+    body: JSON.stringify({ role })
+  })
+}
+
+export async function getAdminSessions(token: string) {
+  return request("/api/admin/sessions", { token }) as Promise<{
+    sessions: AdminSession[]
+  }>
+}
+
+export async function invalidateSession(token: string, jwtId: string) {
+  return request(`/api/admin/sessions/${jwtId}`, { method: "DELETE", token })
+}
+
+export async function getAuditLogs(
+  token: string,
+  params?: { limit?: number; offset?: number; user_id?: number; success?: number }
+) {
+  const qs = new URLSearchParams()
+  if (params?.limit) qs.set("limit", String(params.limit))
+  if (params?.offset) qs.set("offset", String(params.offset))
+  if (params?.user_id !== undefined) qs.set("user_id", String(params.user_id))
+  if (params?.success !== undefined) qs.set("success", String(params.success))
+  const query = qs.toString()
+  return request(`/api/admin/audit-logs${query ? `?${query}` : ""}`, { token }) as Promise<{
+    logs: AuditLogEntry[]
+    total: number
+    limit: number
+    offset: number
+  }>
+}
+
+export async function getRateLimits(token: string) {
+  return request("/api/admin/rate-limits", { token }) as Promise<{
+    limits: RateLimitEntry[]
+  }>
+}
+
+export async function clearRateLimits(token: string, key?: string) {
+  const qs = key ? `?key=${encodeURIComponent(key)}` : ""
+  return request(`/api/admin/rate-limits${qs}`, { method: "DELETE", token })
+}

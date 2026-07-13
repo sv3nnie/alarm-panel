@@ -31,7 +31,18 @@ interface AlarmState {
 const PIN_LENGTH = 4
 
 export default function Home() {
-  const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState<Session | null>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("alarm_session")
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored)
+          if (new Date(parsed.expires_at).getTime() > Date.now()) return parsed
+        } catch {}
+      }
+    }
+    return null
+  })
   const [alarm, setAlarm] = useState<AlarmState>({
     armed: false,
     loading: true,
@@ -88,6 +99,7 @@ export default function Home() {
 
   const handleLogout = () => {
     if (eventSourceRef.current) eventSourceRef.current.close()
+    localStorage.removeItem("alarm_session")
     setSession(null)
     setError(null)
   }
@@ -204,13 +216,20 @@ export default function Home() {
           </div>
         )}
 
-        <button
-          onClick={handleLogout}
-          className="text-white/30 hover:text-white/60 text-sm flex items-center space-x-1 mx-auto transition-colors"
-        >
-          <ArrowRightOnRectangleIcon className="w-4 h-4" />
-          <span>Sign out</span>
-        </button>
+        <div className="flex flex-col items-center space-y-2">
+          {session.user.role === "admin" && (
+            <a href="/admin" className="text-primary/60 hover:text-primary text-sm transition-colors">
+              Admin Panel
+            </a>
+          )}
+          <button
+            onClick={handleLogout}
+            className="text-white/30 hover:text-white/60 text-sm flex items-center space-x-1 mx-auto transition-colors"
+          >
+            <ArrowRightOnRectangleIcon className="w-4 h-4" />
+            <span>Sign out</span>
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -230,6 +249,7 @@ function PinEntry({
   const [lockoutUntil, setLockoutUntil] = useState<number>(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
+  const pinRef = useRef("")
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -245,16 +265,16 @@ function PinEntry({
     nameRef.current?.focus()
   }, [])
 
-  const handleSubmit = async () => {
+  const doSubmit = async (currentPin: string, currentName: string) => {
     if (loading || lockoutUntil > 0) return
 
-    if (!name.trim()) {
+    if (!currentName.trim()) {
       setError("Please enter your name")
       nameRef.current?.focus()
       return
     }
 
-    if (pin.length < PIN_LENGTH) {
+    if (currentPin.length < PIN_LENGTH) {
       setError(`Please enter your ${PIN_LENGTH}-digit PIN`)
       inputRef.current?.focus()
       return
@@ -264,13 +284,16 @@ function PinEntry({
     setError(null)
 
     try {
-      const data = await api.verifyPin(name.trim(), pin)
+      const data = await api.verifyPin(currentName.trim(), currentPin)
       setPin("")
-      onAuthenticated({
+      pinRef.current = ""
+      const session = {
         token: data.token,
         user: data.user,
         expires_at: data.expires_at
-      })
+      }
+      localStorage.setItem("alarm_session", JSON.stringify(session))
+      onAuthenticated(session)
     } catch (err: any) {
       const msg = err.message || "Verification failed"
       setError(msg)
@@ -281,6 +304,7 @@ function PinEntry({
       }
 
       setPin("")
+      pinRef.current = ""
       inputRef.current?.focus()
     } finally {
       setLoading(false)
@@ -289,9 +313,26 @@ function PinEntry({
 
   const handlePinChange = (value: string) => {
     const digits = value.replace(/\D/g, "").slice(0, PIN_LENGTH)
+    pinRef.current = digits
     setPin(digits)
     if (digits.length === PIN_LENGTH && name.trim()) {
-      setTimeout(() => handleSubmit(), 100)
+      doSubmit(digits, name.trim())
+    }
+  }
+
+  const handleNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      inputRef.current?.focus()
+    }
+  }
+
+  const handlePinKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && pinRef.current.length === PIN_LENGTH && name.trim()) {
+      doSubmit(pinRef.current, name.trim())
+    } else if (e.key === "Backspace" && pinRef.current.length === 0) {
+      e.preventDefault()
+      nameRef.current?.focus()
     }
   }
 
@@ -322,12 +363,7 @@ function PinEntry({
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === "Enter") {
-                  e.preventDefault()
-                  inputRef.current?.focus()
-                }
-              }}
+              onKeyDown={handleNameKeyDown}
               placeholder="Name"
               autoComplete="off"
               autoCorrect="off"
@@ -340,14 +376,17 @@ function PinEntry({
 
           {/* PIN digit boxes */}
           <div className="space-y-3">
-            <div className="flex justify-center gap-2 sm:gap-3">
+            <div
+              className="flex justify-center gap-2 sm:gap-3 cursor-pointer"
+              onClick={() => inputRef.current?.focus()}
+            >
               {Array.from({ length: PIN_LENGTH }).map((_, i) => {
                 const filled = i < pin.length
                 const active = i === pin.length
                 return (
                   <div
                     key={i}
-                    className={`pin-digit ${filled ? "pin-digit-filled" : ""} ${active ? "pin-digit-active" : ""}`}
+                    className={`pin-digit ${filled ? "pin-digit-filled" : ""} ${active ? "pin-digit-active" : ""} cursor-pointer`}
                   >
                     {filled ? "\u2022" : ""}
                   </div>
@@ -363,26 +402,13 @@ function PinEntry({
               maxLength={PIN_LENGTH}
               value={pin}
               onChange={e => handlePinChange(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === "Backspace" && pin.length === 0) {
-                  e.preventDefault()
-                  nameRef.current?.focus()
-                }
-              }}
+              onKeyDown={handlePinKeyDown}
+              onBlur={() => setTimeout(() => inputRef.current?.focus(), 0)}
               autoComplete="off"
               autoCorrect="off"
-              tabIndex={-1}
-              className="absolute opacity-0 w-0 h-0"
+              className="absolute opacity-0 w-0 h-0 pointer-events-none"
               aria-label="PIN code"
             />
-
-            <button
-              type="button"
-              onClick={() => inputRef.current?.focus()}
-              className="w-full text-white/30 text-xs sm:text-sm hover:text-white/50 transition-colors"
-            >
-              Tap to enter PIN
-            </button>
           </div>
         </div>
 
@@ -399,7 +425,7 @@ function PinEntry({
         ) : null}
 
         <button
-          onClick={handleSubmit}
+          onClick={() => doSubmit(pinRef.current, name.trim())}
           disabled={loading || lockoutUntil > 0 || pin.length < PIN_LENGTH || !name.trim()}
           className="btn-primary w-full flex items-center justify-center space-x-2"
         >
