@@ -7,7 +7,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Alarm Panel",
   description: "Remote alarm system control panel",
-  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     title: "Alarm Panel",
