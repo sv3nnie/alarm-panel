@@ -56,12 +56,18 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [sseStatus, setSseStatus] = useState<SSEStatus>("connecting")
   const eventSourceRef = useRef<{ close: () => void } | null>(null)
+  // The REST status call is authoritative; we keep the skeleton until it lands
+  // and ignore live SSE updates before it, so a stale push can't flash the
+  // wrong state right after login.
+  const initialLoadedRef = useRef(false)
 
   const pollAlarmState = useCallback(async (token: string) => {
     try {
       const data = await api.getAlarmStatus(token)
+      initialLoadedRef.current = true
       setAlarm(prev => ({ ...prev, armed: data.armed, loading: false }))
     } catch {
+      initialLoadedRef.current = true
       setAlarm(prev => ({ ...prev, loading: false }))
     }
   }, [])
@@ -72,11 +78,18 @@ export default function Home() {
       return
     }
 
+    initialLoadedRef.current = false
+    setAlarm(prev => ({ ...prev, loading: true }))
+
     pollAlarmState(session.token)
 
     const es = api.createSSEConnection(
       session.token,
-      armed => setAlarm(prev => ({ ...prev, armed, loading: false })),
+      armed =>
+        setAlarm(prev => {
+          if (!initialLoadedRef.current) return prev
+          return { ...prev, armed, loading: false }
+        }),
       setSseStatus
     )
 
@@ -191,7 +204,12 @@ export default function Home() {
       <div className="flex-1 flex flex-col p-5 sm:p-6 max-w-md w-full mx-auto">
         <div className="flex-1 flex flex-col items-center justify-center space-y-5 text-center">
           {alarm.loading ? (
-            <span className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+            <>
+              <div className="p-6 rounded-full bg-slate-200/70 dark:bg-slate-800 animate-pulse">
+                <div className="w-12 h-12 rounded-full bg-slate-300/70 dark:bg-slate-700" />
+              </div>
+              <div className="h-7 w-32 rounded-full bg-slate-200/70 dark:bg-slate-800 animate-pulse" />
+            </>
           ) : (
             <>
               <div className={`p-6 rounded-full ${alarm.armed ? "bg-primary/10" : "bg-success/10"}`}>
@@ -216,10 +234,12 @@ export default function Home() {
             </div>
           )}
 
-          {!alarm.armed ? (
+          {alarm.loading ? (
+            <div className="h-[52px] w-full rounded-xl bg-slate-200/70 dark:bg-slate-800 animate-pulse" />
+          ) : !alarm.armed ? (
             <button
               onClick={handleArm}
-              disabled={alarm.actionInProgress || alarm.loading}
+              disabled={alarm.actionInProgress}
               className="btn-primary w-full flex items-center justify-center gap-2"
             >
               <LockClosedIcon className="w-5 h-5" />
@@ -228,7 +248,7 @@ export default function Home() {
           ) : (
             <button
               onClick={handleDisarm}
-              disabled={alarm.actionInProgress || alarm.loading}
+              disabled={alarm.actionInProgress}
               className="btn-success w-full flex items-center justify-center gap-2"
             >
               <LockOpenIcon className="w-5 h-5" />
