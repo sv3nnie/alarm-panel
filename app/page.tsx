@@ -161,7 +161,7 @@ export default function Home() {
 
   return (
     <div className="flex-1 flex flex-col safe-bottom">
-      <header className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+      <header className="flex items-center justify-between px-5 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="bg-primary text-white rounded-xl p-1.5">
             <ShieldCheckIcon className="w-5 h-5" />

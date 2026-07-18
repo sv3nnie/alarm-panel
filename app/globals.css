@@ -115,3 +115,11 @@ body {
 .safe-top {
   padding-top: env(safe-area-inset-top, 0px);
 }
+
+/* Horizontal safe-area insets for landscape notches. Top insets are applied
+   on each page's header so the header background fills behind the status bar
+   when installed as a PWA (black-translucent status bar). */
+.safe-x {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}

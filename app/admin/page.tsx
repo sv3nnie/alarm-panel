@@ -88,8 +88,8 @@ export default function AdminPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-dvh flex flex-col safe-bottom">
-      <header className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+    <div className="flex-1 flex flex-col safe-bottom">
+      <header className="flex items-center justify-between px-5 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
         <div className="flex items-center gap-3">
           <a href="/" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors" aria-label="Terug">
             <ArrowLeftIcon className="w-5 h-5" />

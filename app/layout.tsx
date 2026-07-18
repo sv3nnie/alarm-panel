@@ -37,11 +37,11 @@ export default function RootLayout({
     <html lang="nl">
       <head>
         <link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
-        <link rel="apple-touch-icon" href="/icon-192.svg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className={inter.className}>
         <SWorker />
-        <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 flex flex-col">
+        <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 flex flex-col safe-x">
           {children}
         </div>
       </body>
