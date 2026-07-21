@@ -55,7 +55,7 @@ export default function Home() {
   })
   const [error, setError] = useState<string | null>(null)
   const [sseStatus, setSseStatus] = useState<SSEStatus>("connecting")
-  const eventSourceRef = useRef<{ close: () => void } | null>(null)
+  const eventSourceRef = useRef<{ close: () => void; reconnect: () => void } | null>(null)
   // The REST status call is authoritative; we keep the skeleton until it lands
   // and ignore live SSE updates before it, so a stale push can't flash the
   // wrong state right after login.
@@ -99,6 +99,27 @@ export default function Home() {
     return () => {
       es.close()
       clearInterval(pollInterval)
+    }
+  }, [session, pollAlarmState])
+
+  // iOS suspends the SSE stream and throttles timers while the PWA is
+  // backgrounded, so on return to the foreground we'd otherwise sit on a dead
+  // connection until the 5s backoff fires. Poll immediately and force the stream
+  // to reconnect the moment the app becomes visible again.
+  useEffect(() => {
+    if (!session) return
+    const resume = () => {
+      if (document.visibilityState !== "visible") return
+      pollAlarmState(session.token)
+      eventSourceRef.current?.reconnect()
+    }
+    document.addEventListener("visibilitychange", resume)
+    window.addEventListener("focus", resume)
+    window.addEventListener("online", resume)
+    return () => {
+      document.removeEventListener("visibilitychange", resume)
+      window.removeEventListener("focus", resume)
+      window.removeEventListener("online", resume)
     }
   }, [session, pollAlarmState])
 
@@ -162,7 +183,15 @@ export default function Home() {
   }
 
   if (!session) {
-    return <PinEntry onAuthenticated={setSession} initialError={error} />
+    return (
+      <PinEntry
+        onAuthenticated={s => {
+          setError(null)
+          setSession(s)
+        }}
+        initialError={error}
+      />
+    )
   }
 
   const timeRemaining = session.expires_at

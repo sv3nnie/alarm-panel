@@ -100,7 +100,7 @@ export default function AdminPage() {
       </header>
 
       <div className="flex-1 flex flex-col min-h-0 max-w-5xl w-full mx-auto p-4 sm:p-6 space-y-4">
-        <div className="flex gap-1 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0">
+        <div className="flex gap-1 border-b border-slate-200 dark:border-slate-800 overflow-x-auto overflow-y-hidden shrink-0">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -375,7 +375,7 @@ function SessionsPanel({ token }: { token: string }) {
               <span className="text-slate-900 dark:text-slate-100 font-medium">{s.user_name}</span>
               <span className="text-slate-400 text-xs font-mono">{s.ip || "—"}</span>
               <span className="text-slate-400 text-xs">
-                Verloopt om {new Date(s.expires_at).toLocaleTimeString()}
+                Verloopt om {api.parseServerDate(s.expires_at).toLocaleTimeString()}
               </span>
             </div>
             <button
@@ -452,7 +452,7 @@ function AuditLogsPanel({ token }: { token: string }) {
           >
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0">
               <span className="text-slate-400 font-mono shrink-0">
-                {new Date(log.timestamp).toLocaleString()}
+                {api.parseServerDate(log.timestamp).toLocaleString()}
               </span>
               <span className="text-slate-900 dark:text-slate-100 font-medium">{log.user_name || "—"}</span>
               <span className="text-slate-500 dark:text-slate-400">{log.action}</span>
@@ -525,9 +525,9 @@ function RateLimitsPanel({ token }: { token: string }) {
               <span className="text-slate-900 dark:text-slate-100 font-mono text-xs">{l.key}</span>
               <span className="badge badge-neutral">{l.type}</span>
               <span className="text-slate-400 text-xs">{l.attempts} pogingen</span>
-              {l.locked_until && new Date(l.locked_until) > new Date() && (
+              {l.locked_until && api.parseServerDate(l.locked_until) > new Date() && (
                 <span className="badge bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
-                  Geblokkeerd {Math.ceil((new Date(l.locked_until).getTime() - Date.now()) / 1000)}s
+                  Geblokkeerd {Math.ceil((api.parseServerDate(l.locked_until).getTime() - Date.now()) / 1000)}s
                 </span>
               )}
             </div>
